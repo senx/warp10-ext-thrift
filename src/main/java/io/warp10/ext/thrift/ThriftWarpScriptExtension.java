@@ -8,10 +8,12 @@ import io.warp10.warp.sdk.WarpScriptExtension;
 public class ThriftWarpScriptExtension extends WarpScriptExtension {
   private static Map<String,Object> functions;
 
+  public static final String THRIFTC = "THRIFTC";
+  
   static {
     functions = new HashMap<String, Object>();
     
-    functions.put("THRIFTC", new THRIFTC("THRIFTC"));
+    functions.put(THRIFTC, new THRIFTC(THRIFTC));
     functions.put("THRIFT->", new THRIFTTO("THRIFT->"));
     functions.put("->THRIFT", new TOTHRIFT("->THRIFT"));
   }

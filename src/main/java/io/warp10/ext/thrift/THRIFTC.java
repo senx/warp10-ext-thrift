@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -28,7 +29,20 @@ public class THRIFTC extends NamedWarpScriptFunction implements WarpScriptStackF
   @Override
   public Object apply(WarpScriptStack stack) throws WarpScriptException {
     
-    ByteArrayInputStream in = new ByteArrayInputStream(stack.pop().toString().getBytes(StandardCharsets.UTF_8));
+    Object top = stack.pop();
+    
+    Map<Object,Object> knownTypes = null;
+    
+    if (top instanceof Map) {
+      knownTypes = (Map<Object,Object>) top;
+      top = stack.pop();
+    }
+    
+    if (!(top instanceof String)) {
+      throw new WarpScriptException(getName() + " operates on a STRING.");
+    }
+    
+    ByteArrayInputStream in = new ByteArrayInputStream(top.toString().getBytes(StandardCharsets.UTF_8));
     
     try {
       CharStream input = CharStreams.fromStream(in);
@@ -38,9 +52,11 @@ public class THRIFTC extends NamedWarpScriptFunction implements WarpScriptStackF
       
       DocumentContext context = parser.document();
 
-      DynamicTBaseGenerator generator = new DynamicTBaseGenerator();
+      DynamicTBaseGenerator generator = new DynamicTBaseGenerator(knownTypes);
       
-      generator.generate(context);      
+      generator.generate(context);
+      
+      stack.push(generator.getTypes());
     } catch (IOException ioe) {
       throw new WarpScriptException(getName() +" error compiling Thrift IDL.", ioe);
     }
