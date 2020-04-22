@@ -1,10 +1,12 @@
 package io.warp10.ext.thrift;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.thrift.protocol.TField;
 import org.apache.thrift.protocol.TType;
 
 import com.google.common.base.Preconditions;
@@ -129,9 +131,42 @@ public class DynamicType {
   }
   
   public Object getDefaultValue() {
-    return this.defaultValue;
+    return getDefaultValue(false);
   }
   
+  public Object getDefaultValue(boolean clone) {
+    if (!clone) {
+      return this.defaultValue;
+    } else {
+      return clone(this.defaultValue);
+    }
+  }
+  
+  private Object clone(Object in) {
+    if (null == in) {
+      return null;
+    } else if (in instanceof Number) {
+      return in;
+    } else if (in instanceof Boolean) {
+      return in;
+    } else if (in instanceof String) {
+      return in;
+    } else if (in instanceof List) {
+      ArrayList<Object> l = new ArrayList<Object>(((List) in).size());
+      for (Object elt: (List) in) {
+        l.add(clone(elt));
+      }
+      return l;
+    } else if (in instanceof Map) {
+      Map<Object,Object> m = new LinkedHashMap<Object,Object>(((Map) in).size());
+      for (Entry<Object,Object> e: ((Map<Object,Object>) in).entrySet()) {
+        m.put(clone(e.getKey()), clone(e.getValue()));
+      }
+      return m;
+    } else {
+      throw new RuntimeException("Invalid type.");
+    }
+  }
   public String getDefaultValueRepr(Object v) {
     if (null == v) {
       return null;
@@ -277,5 +312,9 @@ public class DynamicType {
     } else {
       return this.typeName;
     }
+  }
+  
+  public TField getTField() {
+    return new TField(getFieldName(), getType(), (short) getTag());
   }
 }

@@ -1,6 +1,7 @@
 package io.warp10.ext.thrift;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,14 +16,17 @@ import java.util.TreeMap;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TException;
 import org.apache.thrift.TFieldIdEnum;
+import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TMap;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TSet;
+import org.apache.thrift.protocol.TStruct;
 import org.apache.thrift.protocol.TType;
 import org.apache.thrift.scheme.StandardScheme;
 
 import io.warp10.WarpURLEncoder;
+import io.warp10.continuum.store.thrift.data.KafkaDataMessage;
 import io.warp10.script.WarpScriptLib;
 import io.warp10.script.functions.SNAPSHOT.Snapshotable;
 
@@ -99,6 +103,8 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       iprot.readFieldEnd();      
     }
     iprot.readStructEnd();
+    
+    validate();
   }
 
   private Object readValue(TProtocol iprot, DynamicType field) throws TException {
@@ -172,10 +178,88 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
     return fieldsByName.get(name);
   }
   
+  private void writeTuple(TProtocol oprot) throws TException {
+    throw new TException("Unsupported tuple scheme.");
+  }
+  
+  private void writeValue(TProtocol oprot, DynamicType field, Object value) throws TException {
+    // Only call fieldBegin/End if the field is an actual one (vs the type description for containers)
+    if (0 != field.getTag()) {
+      oprot.writeFieldBegin(field.getTField());
+    }
+
+    if (field instanceof DynamicEnum) {
+      oprot.writeI32(((Number) value).intValue());
+    } else if (field instanceof DynamicTBase) {
+      ((DynamicTBase) field).write(oprot);
+    } else {
+      // primitive or container type
+      if (TType.BOOL == field.getType()) {
+        oprot.writeBool(Boolean.TRUE.equals(value));
+      } else if (TType.BYTE == field.getType()) {
+        oprot.writeByte((byte) value);          
+      } else if (TType.DOUBLE == field.getType()) {
+        oprot.writeDouble(((Double) value).doubleValue());          
+      } else if (TType.I16 == field.getType()) {
+        oprot.writeI16(((Number) value).shortValue());          
+      } else if (TType.I32 == field.getType()) {
+        oprot.writeI32(((Number) value).intValue());          
+      } else if (TType.I64 == field.getType()) {
+        oprot.writeI64(((Number) value).longValue());          
+      } else if (TType.LIST == field.getType()) {
+        oprot.writeListBegin(new TList(field.getElementType().getType(), ((List) value).size()));
+        for (Object v: (List) value) {
+          writeValue(oprot, field.getElementType(), v);
+        }
+        oprot.writeListEnd();
+      } else if (TType.SET == field.getType()) {
+        oprot.writeSetBegin(new TSet(field.getElementType().getType(), ((Set) value).size()));
+        for (Object v: (Set) value) {
+          writeValue(oprot, field.getElementType(), v);
+        }
+        oprot.writeSetEnd();          
+      } else if (TType.MAP == field.getType()) {
+        oprot.writeMapBegin(new TMap(field.getKeyType().getType(), field.getElementType().getType(), ((Map) value).size()));
+        for (Entry<Object,Object> e: ((Map<Object,Object>) value).entrySet()) {
+          writeValue(oprot, field.getKeyType(), e.getKey());
+          writeValue(oprot, field.getElementType(), e.getValue());
+        }
+        oprot.writeMapEnd();
+      } else if (TType.STRING == field.getType()) {
+        oprot.writeString((String) value);
+      } else if (BINARY == field.getType()) {
+        oprot.writeBinary(ByteBuffer.wrap((byte[]) value));
+      } else {
+        throw new RuntimeException("Invalid type, cannot serialize.");
+      }
+    }
+    
+    if (0 != field.getTag()) {
+      oprot.writeFieldEnd();
+    }
+  }
+  
   @Override
   public void write(TProtocol oprot) throws TException {
-    System.out.println("write " + oprot); 
-    //scheme(oprot).write(oprot, this);
+    if (!StandardScheme.class.equals(oprot.getScheme())) {
+      writeTuple(oprot);
+      return;
+    }
+
+    oprot.writeStructBegin(new TStruct(this.getTypeName()));
+     
+    // Start by writing
+    for (DynamicType field: fieldsById.values()) {
+      Object value = struct.get(field.getFieldName()); 
+      
+      if (null == value) {
+        continue;
+      }
+      
+      writeValue(oprot, field, value);
+    }
+    oprot.writeFieldStop();
+    oprot.writeStructEnd();
   }
 
   @Override
@@ -245,6 +329,12 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
   
   private void validate() {
     for (DynamicType field: this.fieldsById.values()) {
+      if (!struct.containsKey(field.getFieldName())) {
+        Object defval = field.getDefaultValue(true);
+        if (null != defval) {
+          struct.put(field.getFieldName(), field.getDefaultValue(true));
+        }
+      }
       if (field.isRequired() && !this.struct.containsKey(field.getFieldName())) {
         throw new RuntimeException("Missing required field '" + field.getFieldName() + "'.");
       }
@@ -365,5 +455,9 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
     }
         
     return sb.toString();
+  }
+  
+  public void setStruct(Map<Object,Object> map) {
+    this.struct = map;
   }
 }
