@@ -19,11 +19,16 @@ package io.warp10.ext.thrift;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.warp10.script.functions.TYPEOF;
+import io.warp10.script.functions.TYPEOF.TypeResolver;
 import io.warp10.warp.sdk.WarpScriptExtension;
 
 public class ThriftWarpScriptExtension extends WarpScriptExtension {
   private static Map<String,Object> functions;
 
+  public static final String TENUM = "TENUM";
+  public static final String TBASE = "TBASE";
+  
   public static final String THRIFTC = "THRIFTC";
   
   static {
@@ -32,6 +37,18 @@ public class ThriftWarpScriptExtension extends WarpScriptExtension {
     functions.put(THRIFTC, new THRIFTC(THRIFTC));
     functions.put("THRIFT->", new THRIFTTO("THRIFT->"));
     functions.put("->THRIFT", new TOTHRIFT("->THRIFT"));
+    
+    TYPEOF.addResolver(new TypeResolver() {            
+      @Override
+      public String typeof(Class clazz) {
+        if (clazz.isAssignableFrom(DynamicEnum.class)) {
+          return TENUM;
+        } else if (clazz.isAssignableFrom(DynamicTBase.class)) {
+          return TBASE;
+        }
+        return null;
+      }
+    });
   }
   
   @Override

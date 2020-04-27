@@ -38,7 +38,7 @@ public class THRIFTTO extends NamedWarpScriptFunction implements WarpScriptStack
     Object top = stack.pop();
     
     if (!(top instanceof DynamicTBase)) {
-      throw new WarpScriptException(getName() + " expects a compiled Thrift structure.");
+      throw new WarpScriptException(getName() + " expects a compiled Thrift structure (" + ThriftWarpScriptExtension.TBASE + ").");
     }
     
     // We clone the DynamicTBase so we can safely deserialize
@@ -59,7 +59,7 @@ public class THRIFTTO extends NamedWarpScriptFunction implements WarpScriptStack
     try {
       deser.deserialize(tbase, data);
     } catch (TException te) {
-      throw new WarpScriptException(getName() + " encountered an error while deserializing.");
+      throw new WarpScriptException(getName() + " encountered an error while deserializing.", te);
     }
     
     stack.push(tbase.getStruct());

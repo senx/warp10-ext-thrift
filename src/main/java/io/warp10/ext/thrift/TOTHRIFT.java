@@ -38,7 +38,7 @@ public class TOTHRIFT extends NamedWarpScriptFunction implements WarpScriptStack
     Object top = stack.pop();
     
     if (!(top instanceof DynamicTBase)) {
-      throw new WarpScriptException(getName() + " expects a Thrift structure descriptor.");
+      throw new WarpScriptException(getName() + " expects a Thrift structure descriptor (" + ThriftWarpScriptExtension.TBASE + ").");
     }
     
     DynamicTBase tbase = ((DynamicTBase) top).clone();
