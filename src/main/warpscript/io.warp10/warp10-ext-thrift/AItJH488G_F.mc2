@@ -34,7 +34,8 @@ THRIFTC
 }
 $tbase ->THRIFT
 
-    '> URLDECODE
+    '>
+URLDECODE
   ]
 } 'info' STORE
 <%
