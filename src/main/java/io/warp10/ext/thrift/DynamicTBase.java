@@ -1,3 +1,19 @@
+//
+//   Copyright 2020  SenX S.A.S.
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//
+
 package io.warp10.ext.thrift;
 
 import java.io.UnsupportedEncodingException;
@@ -16,7 +32,6 @@ import java.util.TreeMap;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TException;
 import org.apache.thrift.TFieldIdEnum;
-import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TList;
 import org.apache.thrift.protocol.TMap;
 import org.apache.thrift.protocol.TProtocol;
@@ -26,7 +41,6 @@ import org.apache.thrift.protocol.TType;
 import org.apache.thrift.scheme.StandardScheme;
 
 import io.warp10.WarpURLEncoder;
-import io.warp10.continuum.store.thrift.data.KafkaDataMessage;
 import io.warp10.script.WarpScriptLib;
 import io.warp10.script.functions.SNAPSHOT.Snapshotable;
 
