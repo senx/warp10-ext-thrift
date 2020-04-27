@@ -29,7 +29,8 @@ struct message {
 }
 '%3E
 THRIFTC
-    '> URLDECODE
+    '>
+URLDECODE
   ]
 } 'info' STORE
 <%
