@@ -1,0 +1,55 @@
+{
+  'name' '->THRIFT'
+  'ext' 'io.warp10.ext.thrift.ThriftWarpScriptExtension'
+  'related' [ 'THRIFTC' 'THRIFT->' ]
+  'desc'
+  <'
+ The `->THRIFTC` function serializes a map as a thrift structure using the [TCompactProtocol](https://github.com/apache/thrift/blob/master/lib/java/src/org/apache/thrift/protocol/TCompactProtocol.java).
+
+The function needs a `TBASE` instance describing the target structure.
+  '>
+  'sig' [
+    [ [ 'tbase:TBASE' 'struct:MAP'  ] [ 'bytes:BYTES'  ] ]
+  ]
+  'params' {
+    'tbase' 'Compiled thrift idl structure description.'
+    'bytes' 'Serialized data.'
+    'struct' 'Content to serialize.'
+  }
+  'examples' [
+    <'
+%3C'
+struct message {
+  1: i32 int,
+  2: i64 long,
+  3: string characterstring,
+}
+'%3E
+THRIFTC
+'message' GET 'tbase' STORE
+{
+  'int' 42
+  'long' 0x7FFFFFFFFFFFFFFF
+  'characterstring' '@@@
+}
+$tbase ->THRIFT
+
+    '> URLDECODE
+  ]
+} 'info' STORE
+<%
+  !$info INFO
+  SAVE 'context' STORE
+  <%
+    '->THRIFT' EVAL
+  %>
+  <% // catch any exception
+    RETHROW
+  %>
+  <% // finally, restore the context
+    $context RESTORE
+  %> TRY
+%>
+'macro' STORE
+// Unit tests
+$macro

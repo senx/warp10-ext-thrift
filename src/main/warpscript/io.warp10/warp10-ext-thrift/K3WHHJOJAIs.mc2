@@ -1,0 +1,50 @@
+{
+  'name' 'THRIFT->'
+  'ext' 'io.warp10.ext.thrift.ThriftWarpScriptExtension'
+  'related' [ 'THRIFTC' '->THRIFT' ]
+  'desc'
+  <'
+ The `THRIFTC->` function deserializes a serialized thrift structure and outputs a map of elements reflecting the content of the structure.
+
+The function needs a `TBASE` instance describing how the serialized content should be deserialized.
+  '>
+  'sig' [
+    [ [ 'tbase:TBASE' 'bytes:BYTES'  ] [ 'struct:MAP'  ] ]
+  ]
+  'params' {
+    'tbase' 'Compiled thrift idl structure description.'
+    'bytes' 'Serialized data to deserialize.'
+    'struct' 'Result of the deserialization.'
+  }
+  'examples' [
+    <'
+%3C'
+struct message {
+  1: i32 int,
+  2: i64 long,
+  3: string characterstring,
+}
+'%3E
+THRIFTC
+'message' GET 'tbase' STORE
+'15fe03168002180340404000' HEX-> 'bytes' STORE
+$bytes $tbase THRIFT->
+    '> URLDECODE
+  ]
+} 'info' STORE
+<%
+  !$info INFO
+  SAVE 'context' STORE
+  <%
+    'THRIFT->' EVAL
+  %>
+  <% // catch any exception
+    RETHROW
+  %>
+  <% // finally, restore the context
+    $context RESTORE
+  %> TRY
+%>
+'macro' STORE
+// Unit tests
+$macro

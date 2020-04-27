@@ -1,0 +1,50 @@
+{
+  'name' 'THRIFTC'
+  'ext' 'io.warp10.ext.thrift.ThriftWarpScriptExtension'
+  'related' [ 'THRIFT->' '->THRIFT' ]
+  'desc'
+  <'
+ The `THRIFTC` function builds a map of `TBASE` and `TENUM` instances from a [Thrift IDL](https://thrift.apache.org/docs/idl) description of enumerations and structures.
+ 
+`TBASE` instances are needed to serialize and deserialize data to/from Thrift.
+
+This [missing manual](https://diwakergupta.github.io/thrift-missing-guide/) may be of interest to those doing their first steps with [Thrift](https://thrift.apache.org/).
+  '>
+  'sig' [
+    [ [ 'idl:STRING'  ] [ 'types:MAP'  ] ]
+    [ [ 'idl:STRING' 'init:MAP' ] [ 'types:MAP' ] ]
+  ]
+  'params' {
+    'idl' 'Textual description of enumerations and structures using the Thrift IDL.'
+    'types' 'Map of type name to either `TENUM` or `TBASE` instance.'
+    'init' 'Initial map of known types, for example one from a previous `THRIFTC` call.'
+  }
+  'examples' [
+    <'
+%3C'
+struct message {
+  1: i32 int,
+  2: i64 long,
+  3: string characterstring,
+}
+'%3E
+THRIFTC
+    '> URLDECODE
+  ]
+} 'info' STORE
+<%
+  !$info INFO
+  SAVE 'context' STORE
+  <%
+    'THRIFTC' EVAL
+  %>
+  <% // catch any exception
+    RETHROW
+  %>
+  <% // finally, restore the context
+    $context RESTORE
+  %> TRY
+%>
+'macro' STORE
+// Unit tests
+$macro
