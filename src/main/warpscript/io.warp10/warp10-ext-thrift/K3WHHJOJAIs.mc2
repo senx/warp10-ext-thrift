@@ -29,7 +29,8 @@ THRIFTC
 'message' GET 'tbase' STORE
 '15fe03168002180340404000' HEX-> 'bytes' STORE
 $bytes $tbase THRIFT->
-    '> URLDECODE
+    '>
+URLDECODE
   ]
 } 'info' STORE
 <%
