@@ -235,6 +235,7 @@ public class DynamicType {
     dt.modifier = this.modifier;
     dt.fieldName = this.fieldName;
     dt.typeName = this.typeName;
+    dt.tag = this.tag;
     
     return dt;
   }
