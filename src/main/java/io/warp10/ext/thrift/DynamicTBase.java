@@ -198,6 +198,7 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
   
   private void writeValue(TProtocol oprot, DynamicType field, Object value) throws TException {
     // Only call fieldBegin/End if the field is an actual one (vs the type description for containers)
+
     if (0 != field.getTag()) {
       oprot.writeFieldBegin(field.getTField());
     }
@@ -208,7 +209,7 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       ((DynamicTBase) field).write(oprot);
     } else {
       // primitive or container type
-      if (TType.BOOL == field.getType()) {
+      if (TType.BOOL == field.getType()) {       
         oprot.writeBool(Boolean.TRUE.equals(value));
       } else if (TType.BYTE == field.getType()) {
         oprot.writeByte((byte) value);          
@@ -278,42 +279,37 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
 
   @Override
   public int compareTo(Object o) {
-    System.out.println("compareTo " + o);
-    return 0;
+    throw new RuntimeException("Method not implemented.");
   }
 
   @Override
   public TFieldIdEnum fieldForId(int fieldId) {
-    System.out.println("fieldForId " + fieldId);
-    return null;
+    throw new RuntimeException("Method not implemented.");
   }
 
   @Override
   public boolean isSet(TFieldIdEnum field) {
-    // TODO Auto-generated method stub
-    return false;
+    throw new RuntimeException("Method not implemented.");
   }
 
   @Override
   public Object getFieldValue(TFieldIdEnum field) {
-    System.out.println("getFieldValue " + field);
-    return null;
+    throw new RuntimeException("Method not implemented.");
   }
 
   @Override
   public void setFieldValue(TFieldIdEnum field, Object value) {
-    System.out.println("setFieldValue " + field + " " + value);
+    throw new RuntimeException("Method not implemented.");
   }
 
   @Override
   public TBase deepCopy() {
-    System.out.println("deepCopy");
-    return null;
+    throw new RuntimeException("Method not implemented.");
   }
 
   @Override
   public void clear() {
-    System.out.println("clear");    
+    throw new RuntimeException("Method not implemented.");
   }
   
   public void addField(DynamicType field) {
