@@ -35,9 +35,6 @@ public class DynamicTBaseGenerator {
   private List<DynamicTBase> currentStructs = new ArrayList<DynamicTBase>();
   
   private Map<String,DynamicType> types = new LinkedHashMap<String,DynamicType>();
-  //private Map<String,DynamicTBase> structs = new LinkedHashMap<String,DynamicTBase>();
-  //private Map<String,DynamicEnum> enums = new LinkedHashMap<String,DynamicEnum>();
-  //private Map<String,DynamicType> typedefs = new LinkedHashMap<String,DynamicType>();
   
   public DynamicTBaseGenerator() {
     this(null);
