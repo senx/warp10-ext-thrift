@@ -114,7 +114,9 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       }
 
       Object value = readValue(iprot, field);
-      struct.put(field.getFieldName(), value);
+      if (null != value) {
+        struct.put(field.getFieldName(), value);
+      }
       iprot.readFieldEnd();      
     }
     iprot.readStructEnd();

@@ -119,9 +119,6 @@ public class DynamicEnum extends DynamicType implements Snapshotable {
   
   public String valueOf(int ordinal) {
     String value = entries.get(ordinal);
-    if (null == value) {
-      throw new RuntimeException("Unknown enum value " + ordinal);
-    }
     return value;
   }
   
