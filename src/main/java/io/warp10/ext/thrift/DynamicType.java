@@ -134,6 +134,10 @@ public class DynamicType {
     this.modifier = mod;
   }
   
+  public Modifier getModifier() {
+    return this.modifier;
+  }
+  
   public boolean isRequired() {
     return Modifier.REQUIRED == this.modifier;
   }

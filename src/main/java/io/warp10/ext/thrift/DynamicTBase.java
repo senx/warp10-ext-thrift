@@ -106,13 +106,14 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       // The field does not have the same type as the expected type, skip
       byte type = field.getType();      
 
-      if (type != schemeField.type && (type != BINARY && schemeField.type != TType.STRING)) {
+      if (type != schemeField.type
+          && (type != BINARY && schemeField.type != TType.STRING)
+          && (type != TType.ENUM && schemeField.type != TType.I32)) {
         org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
         continue;        
       }
 
       Object value = readValue(iprot, field);
-
       struct.put(field.getFieldName(), value);
       iprot.readFieldEnd();      
     }
@@ -134,7 +135,8 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       value = iprot.readDouble();
     } else if (TType.ENUM == type) {
       // Enum values are stored as 32 bit integers
-      value = (long) iprot.readI32();
+      value = (int) iprot.readI32();
+      value = ((DynamicEnum) field).valueOf(((Integer) value).intValue());
     } else if (TType.I16 == type) {
       value = (long) iprot.readI16();
     } else if (TType.I32 == type) {
@@ -204,6 +206,9 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
     }
 
     if (field instanceof DynamicEnum) {
+      if (value instanceof String) {
+        value = ((DynamicEnum) field).valueOf((String) value);
+      }
       oprot.writeI32(((Number) value).intValue());
     } else if (field instanceof DynamicTBase) {
       ((DynamicTBase) field).write(oprot);
@@ -261,6 +266,8 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       return;
     }
 
+    validate();
+    
     oprot.writeStructBegin(new TStruct(this.getTypeName()));
      
     // Start by writing
@@ -347,6 +354,15 @@ public class DynamicTBase extends DynamicType implements TBase, Snapshotable {
       }
       if (field.isRequired() && !this.struct.containsKey(field.getFieldName())) {
         throw new RuntimeException("Missing required field '" + field.getFieldName() + "'.");
+      }
+      if (!this.struct.containsKey(field.getFieldName())) {
+        continue;
+      }
+      // Validate enum values
+      if (TType.ENUM == field.getType()) {
+        DynamicEnum de = (DynamicEnum) field;
+        Object val = this.struct.get(field.getFieldName());
+        de.validate(val);
       }
     }
   }

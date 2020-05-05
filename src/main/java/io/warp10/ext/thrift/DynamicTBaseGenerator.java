@@ -111,7 +111,7 @@ public class DynamicTBaseGenerator {
       }
       
       DynamicType type = getType(fc.field_type());
-      
+
       type.setTag(tag);
       
       if (null != fc.field_req()) {

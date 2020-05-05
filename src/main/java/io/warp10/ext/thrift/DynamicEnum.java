@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.thrift.protocol.TField;
 import org.apache.thrift.protocol.TType;
 
 import io.warp10.WarpURLEncoder;
@@ -29,7 +30,7 @@ import io.warp10.script.WarpScriptLib;
 import io.warp10.script.functions.SNAPSHOT.Snapshotable;
 
 public class DynamicEnum extends DynamicType implements Snapshotable {
-  
+
   private final Map<Integer,String> entries = new HashMap<Integer,String>();
   private int nextOrdinal = 0;
   
@@ -41,7 +42,7 @@ public class DynamicEnum extends DynamicType implements Snapshotable {
   public void add(String name) {
     add(name, nextOrdinal);
   }
-  public void add(String name, int ordinal) {    
+  public void add(String name, int ordinal) { 
     if (entries.containsValue(name)) {
       throw new RuntimeException("Duplicate name '" + name + "'.");
     }
@@ -56,6 +57,11 @@ public class DynamicEnum extends DynamicType implements Snapshotable {
     de.nextOrdinal = this.nextOrdinal;
     de.entries.clear();
     de.entries.putAll(this.entries);
+    de.setDefaultValue(this.getDefaultValue());
+    de.setFieldName(this.getFieldName());
+    de.setModifier(this.getModifier());
+    de.setTag(this.getTag());
+    
     return de;
   }
   
@@ -89,6 +95,19 @@ public class DynamicEnum extends DynamicType implements Snapshotable {
     }
   }
   
+  public void validate(Object val) {
+    if (val instanceof Long) {
+      int ordinal = ((Long) val).intValue();
+      if (!entries.containsKey(ordinal)) {
+        throw new RuntimeException("Invalid numeric enum value " + val);
+      }
+    } else if (val instanceof String) {
+      valueOf((String) val);
+    } else {
+      throw new RuntimeException("Invalid enum value " + val);
+    }
+  }
+  
   public int valueOf(String name) {
     for (Entry<Integer,String> entry: entries.entrySet()) {
       if (entry.getValue().equals(name)) {
@@ -98,7 +117,19 @@ public class DynamicEnum extends DynamicType implements Snapshotable {
     throw new RuntimeException("Unknown enum value '" + name + "'.");
   }
   
+  public String valueOf(int ordinal) {
+    String value = entries.get(ordinal);
+    if (null == value) {
+      throw new RuntimeException("Unknown enum value " + ordinal);
+    }
+    return value;
+  }
+  
   public String toString() {
     return getTypeName();
+  }
+  
+  public TField getTField() {
+    return new TField(getFieldName(), TType.I32, (short) getTag());
   }
 }

@@ -10,10 +10,13 @@ The function needs a `TBASE` instance describing the target structure.
   '>
   'sig' [
     [ [ 'tbase:TBASE' 'struct:MAP'  ] [ 'bytes:BYTES'  ] ]
+    [ [ 'name:STRING' 'descriptions:MAP' 'struct:MAP' ] [ 'bytes:BYTES' ] ]
   ]
   'params' {
     'tbase' 'Compiled thrift idl structure description.'
     'bytes' 'Serialized data.'
+    'name' 'Name of structure description from `descriptions` to use.'
+    'descriptions' 'Compiled thrift idl structure descriptions map, as returned by `THRIFTC`.'
     'struct' 'Content to serialize.'
   }
   'examples' [
